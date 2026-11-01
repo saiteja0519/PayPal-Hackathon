@@ -1,0 +1,61 @@
+# ──────────────────────────────────────────────
+# Python / Backend
+# ──────────────────────────────────────────────
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/**/*.pyc
+backend/**/*.pyo
+backend/.pytest_cache/
+backend/paypilot.db
+backend/*.db
+backend/*.db-shm
+backend/*.db-wal
+backend/htmlcov/
+backend/.coverage
+backend/coverage.xml
+backend/.mypy_cache/
+backend/.ruff_cache/
+
+# Alembic generated versions (keep the directory)
+!backend/alembic/versions/.gitkeep
+
+# ──────────────────────────────────────────────
+# Node / Frontend
+# ──────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/coverage/
+
+# ──────────────────────────────────────────────
+# Environment / Secrets
+# ──────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env
+frontend/.env.local
+
+# ──────────────────────────────────────────────
+# OS / IDE
+# ──────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*.orig
+
+# ──────────────────────────────────────────────
+# Docker
+# ──────────────────────────────────────────────
+docker-compose.override.yml
+
+# ──────────────────────────────────────────────
+# Logs
+# ──────────────────────────────────────────────
+*.log
+logs/
