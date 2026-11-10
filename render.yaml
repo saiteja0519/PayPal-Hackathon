@@ -1,0 +1,58 @@
+# Render Blueprint – deploy both services with one click
+# https://render.com/docs/blueprint-spec
+
+services:
+  # ──────────────────────────────────────────────
+  # FastAPI Backend (Web Service)
+  # ──────────────────────────────────────────────
+  - type: web
+    name: paypilot-api
+    runtime: python
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      - key: DATABASE_URL
+        value: "sqlite:///./paypilot.db"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: "https://paypilot-ai.onrender.com"
+      - key: PAYPAL_MODE
+        value: sandbox
+      - key: PAYPAL_CLIENT_ID
+        value: mock_paypal_client_id
+      - key: PAYPAL_CLIENT_SECRET
+        value: mock_paypal_client_secret
+      - key: AI_PROVIDER
+        value: deterministic
+      - key: SEED_DEMO_DATA
+        value: "true"
+
+  # ──────────────────────────────────────────────
+  # React / Vite Frontend (Static Site)
+  # ──────────────────────────────────────────────
+  - type: web
+    name: paypilot-ai
+    runtime: static
+    region: oregon
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://paypilot-api.onrender.com/api/*
+      - type: rewrite
+        source: /*
+        destination: /index.html

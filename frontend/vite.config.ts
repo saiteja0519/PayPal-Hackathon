@@ -19,4 +19,6 @@ export default defineConfig({
       },
     },
   },
+  // In production (Render static site), /api/* is rewritten by render.yaml routes
+  // No proxy needed — the static site's rewrite rules handle it
 })

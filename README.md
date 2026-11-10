@@ -16,7 +16,7 @@
 - [Demo Credentials](#demo-credentials)
 - [Environment Variables](#environment-variables)
 - [Running Tests](#running-tests)
-- [Docker Deployment](#docker-deployment)
+- [Deployment (Render)](#deployment-render--free-tier)
 - [Feature Status](#feature-status)
 - [Security Notes](#security-notes)
 
@@ -283,9 +283,71 @@ Tests run entirely at the service layer (no live database, no network, no creden
 
 ---
 
-## Docker Deployment
+## Deployment (Render – Free Tier)
 
-### Development with Docker Compose
+This project is configured for **one-click deployment on [Render.com](https://render.com)** using the included `render.yaml` blueprint.
+
+### Option A: One-Click Blueprint Deploy (Recommended)
+
+1. **Push your code to GitHub** (if not already done):
+   ```bash
+   git add -A
+   git commit -m "Add Render deployment configuration"
+   git push origin main
+   ```
+
+2. **Go to [Render Dashboard](https://dashboard.render.com)**
+
+3. Click **"New"** → **"Blueprint"**
+
+4. Connect your GitHub repository (`paypilot-ai`)
+
+5. Render will detect `render.yaml` and auto-configure:
+   - ✅ **paypilot-api** — FastAPI backend (Web Service, free plan)
+   - ✅ **paypilot-ai** — React frontend (Static Site, free plan)
+
+6. Click **"Apply"** — both services deploy automatically!
+
+7. Your app will be live at:
+   - **Frontend**: `https://paypilot-ai.onrender.com`
+   - **Backend API**: `https://paypilot-api.onrender.com`
+   - **API Docs**: `https://paypilot-api.onrender.com/docs`
+
+### Option B: Manual Service Setup
+
+#### Backend (Web Service)
+| Setting | Value |
+|---------|-------|
+| **Runtime** | Python |
+| **Root Directory** | `backend` |
+| **Build Command** | `pip install -r requirements.txt` |
+| **Start Command** | `uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
+| **Plan** | Free |
+
+**Environment Variables to set:**
+| Variable | Value |
+|----------|-------|
+| `SECRET_KEY` | *(auto-generate or use `openssl rand -hex 32`)* |
+| `CORS_ORIGINS` | `https://paypilot-ai.onrender.com` |
+| `DATABASE_URL` | `sqlite:///./paypilot.db` |
+| `PAYPAL_MODE` | `sandbox` |
+| `AI_PROVIDER` | `deterministic` |
+| `SEED_DEMO_DATA` | `true` |
+
+#### Frontend (Static Site)
+| Setting | Value |
+|---------|-------|
+| **Root Directory** | `frontend` |
+| **Build Command** | `npm install && npm run build` |
+| **Publish Directory** | `dist` |
+
+**Add these Rewrite/Redirect Rules** in the Static Site settings:
+| Source | Destination | Type |
+|--------|-------------|------|
+| `/api/*` | `https://paypilot-api.onrender.com/api/*` | Rewrite |
+| `/*` | `/index.html` | Rewrite |
+
+### Docker Deployment (Alternative)
 
 ```bash
 # Copy and configure environment
@@ -311,6 +373,8 @@ docker-compose up --build
 6. Enable HTTPS
 7. Set `CORS_ORIGINS` to your actual frontend domain
 8. Remove `SEED_DEMO_DATA=true` in production
+
+> ⚠️ **Render Free Tier Note**: Free web services spin down after 15 minutes of inactivity. The first request after sleep takes ~30 seconds to wake up. SQLite data persists on the service's disk but is **reset on every deploy**. For persistent data, upgrade to a paid plan or switch to Render PostgreSQL.
 
 ---
 

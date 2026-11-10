@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import List, Optional
+from pydantic import field_validator
+from typing import List, Optional, Union
 import os
 
 class Settings(BaseSettings):
@@ -23,7 +24,7 @@ class Settings(BaseSettings):
     PAYPAL_BASE_URL: str = "https://api-m.sandbox.paypal.com"
     
     # AI Assistant configuration
-    AI_PROVIDER: str = "gemini"  # 'gemini', 'openai', or 'deterministic'
+    AI_PROVIDER: str = "deterministic"  # 'gemini', 'openai', or 'deterministic'
     LLM_API_KEY: Optional[str] = None
     LLM_MODEL: str = "gemini-1.5-flash"
     
@@ -34,13 +35,23 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: Optional[str] = None
     EMAIL_FROM: str = "billing@paypilot.ai"
     
-    # CORS
+    # CORS – accepts a comma-separated string from env vars OR a list
     CORS_ORIGINS: List[str] = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:3000",
         "http://127.0.0.1:3000"
     ]
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v):
+        if isinstance(v, str):
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
+        return v
+
+    # Deployment
+    RENDER: bool = False  # Set to true on Render
 
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True, extra="allow")
 
